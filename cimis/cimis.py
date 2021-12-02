@@ -13,12 +13,13 @@ def get_stations(all: bool = False) -> pd.DataFrame:
 
     Parameters
     ----------
-    all :
+    all: bool : All stations? (or just active)
          (Default value = False)
 
     Returns
     -------
-
+    stations: pd.DataFrame
+    
     """
     try:
         r = requests.get('http://et.water.ca.gov/api/station')
@@ -46,7 +47,26 @@ def get_hourly_data(
         end: date,
         appKey: str = os.getenv('CIMIS_API_KEY')
     ) -> pd.DataFrame:
-    """Get hourly weather station data"""
+    """Get hourly weather station data
+
+    Parameters
+    ----------
+    station_ids: list[int] : Station IDs/numbers
+        
+    variables: list[str] : Variables to return
+        
+    start: date : Start date
+        
+    end: date : End date
+        
+    appKey: str : API Key
+         (Default value = os.getenv('CIMIS_API_KEY'))
+
+    Returns
+    -------
+    cimis_data: pd.DataFrame
+
+    """
 
     cimis_data = []
     for station_id in station_ids:
@@ -67,7 +87,26 @@ def query_cimis(
         end: date,
         appKey: str
     ) -> pd.DataFrame:
-    """Send the query to the CIMIS API"""
+    """Send the query to the CIMIS API
+
+    Parameters
+    ----------
+    station_id: int : Station ID/number
+        
+    variables: list[str] : Variables to return
+        
+    start: date : Start date
+        
+    end: date : End date
+        
+    appKey: str : API Key
+        
+
+    Returns
+    -------
+    df: pd.DataFrame
+
+    """
 
     payload = {
         'appKey': appKey,
