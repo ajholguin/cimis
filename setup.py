@@ -7,7 +7,6 @@ setup(
     version="0.0.1",
     packages=find_packages(include=["cimis", "cimis.*"]),
     install_requires=[
-        "python-dotenv",
         "pandas>=1.0",
         "requests",
     ],
