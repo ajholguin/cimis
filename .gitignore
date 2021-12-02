@@ -1,3 +1,5 @@
 .vscode/
+.scratch/
 *.egg-info
 *.py[cod]
+.env

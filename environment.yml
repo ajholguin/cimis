@@ -1,0 +1,12 @@
+name: cimis
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9.*
+  - python-dotenv
+  - pandas>=1.0
+  - requests
+  - pip
+  - pip:
+    - "-e ."
