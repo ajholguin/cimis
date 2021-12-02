@@ -4,7 +4,7 @@ Python wrapper for the CIMIS weather station API
 
 import os, requests
 import pandas as pd
-from .util import to_title_case
+from .util import var_name_dict
 
 def get_stations(all=False):
     """Get station info.
@@ -65,7 +65,7 @@ def query_cimis(station_id, variables, start, end, appKey):
     df = pd.DataFrame(r.json()['Data']['Providers'][0]['Records'])
 
     for var in variables:
-        var_name = to_title_case(var)
+        var_name = var_name_dict[var]
         var_df = pd.json_normalize(df[var_name]).add_prefix(f'{var_name}_')
         df = pd.concat([df.drop(columns=var_name), var_df], axis=1)
 

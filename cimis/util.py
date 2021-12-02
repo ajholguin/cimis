@@ -1,4 +1,16 @@
-def to_title_case(s):
-    s_parts = s.split('-')
-    s_title = map(lambda s: s.capitalize(), s_parts)
-    return ''.join(s_title)
+var_name_dict = {
+    'hly-air-tmp': 'HlyAirTmp',
+    'hly-dew-pnt': 'HlyDewPnt',
+    'hly-eto': 'HlyEto',
+    'hly-net-rad': 'HlyNetRad',
+    'hly-asce-eto': 'HlyAsceEto',
+    'hly-asce-etr': 'HlyAsceEtr',
+    'precip': 'Precip',
+    'hly-rel-hum': 'HlyRelHum',
+    'hly-res-wind': 'HlyResWind',
+    'hly-soil-tmp': 'HlySoilTmp',
+    'hly-sol-rad': 'HlySolRad',
+    'hly-vap-pres': 'HlyVapPres',
+    'hly-wind-dir': 'HlyWindDir',
+    'hly-wind-spd': 'HlyWindSpd',
+}
