@@ -2,6 +2,18 @@
 
 Python wrapper for CIMIS API
 
+## Installation
+
+_TODO_
+
+## Usage Examples
+
+_TODO_
+
+## Contributing
+
+_TODO_
+
 ## Development
 
 ### Update development environment
@@ -20,6 +32,12 @@ To update the environment:
 conda env update -n cimis -f requirements.txt
 ```
 
+Document development environment:
+
+```sh
+conda list --export > requirements.txt
+```
+
 ### Document
 
 Documentation is done using `pyment`. For example:
@@ -27,3 +45,7 @@ Documentation is done using `pyment`. For example:
 ```sh
 pyment -w -o numpydoc cimis/cimis.py
 ```
+
+## License
+
+_TBD_

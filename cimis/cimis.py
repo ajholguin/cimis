@@ -2,6 +2,8 @@
 Python wrapper for the CIMIS weather station API
 """
 
+import pandas as pd
+
 def get_stations(all=False):
     """Get station info.
 
@@ -14,7 +16,7 @@ def get_stations(all=False):
     -------
 
     """
-    pass
+    return pd.DataFrame()
 
 def get_hourly_data():
     """Get hourly weather station data"""
