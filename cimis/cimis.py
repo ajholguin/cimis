@@ -5,6 +5,7 @@ Python wrapper for the CIMIS weather station API
 import os, requests
 import pandas as pd
 from datetime import date
+from typing import Union
 
 from .util import var_name_dict
 
@@ -29,10 +30,10 @@ def get_stations(all: bool = False) -> pd.DataFrame:
     # parse returned data
     stations = pd.DataFrame(r.json()['Stations'])
 
-    stations[['StationNbr']] = stations[['StationNbr']].astype(int)
-    stations[['IsActive']] = stations[['IsActive']] == 'True'
-    stations[['IsEtoStation']] = stations[['IsEtoStation']] == 'True'
-    stations[['Elevation']] = stations[['Elevation']].astype(float)
+    stations['StationNbr'] = stations['StationNbr'].astype(int)
+    stations['IsActive'] = stations['IsActive'] == 'True'
+    stations['IsEtoStation'] = stations['IsEtoStation'] == 'True'
+    stations['Elevation'] = stations['Elevation'].astype(float)
 
     # active only?
     if not all:
@@ -41,17 +42,17 @@ def get_stations(all: bool = False) -> pd.DataFrame:
     return stations
 
 def get_hourly_data(
-        station_ids: list[int],
+        station_ids: Union[int, list[int]],
         variables: list[str],
         start: date,
         end: date,
-        appKey: str = os.getenv('CIMIS_API_KEY')
+        appKey: str = None
     ) -> pd.DataFrame:
     """Get hourly weather station data
 
     Parameters
     ----------
-    station_ids: list[int] : Station IDs/numbers
+    station_ids: Union[int, list[int]] : Station IDs/numbers
         
     variables: list[str] : Variables to return
         
@@ -67,6 +68,13 @@ def get_hourly_data(
     cimis_data: pd.DataFrame
 
     """
+
+    appKey = appKey if appKey else os.getenv('CIMIS_API_KEY')
+
+    if isinstance(station_ids, pd.Series):
+        station_ids = station_ids.tolist()      # Pandas Series
+    elif isinstance(station_ids, int):
+        station_ids = [station_ids]             # single value
 
     cimis_data = []
     for station_id in station_ids:
@@ -108,6 +116,9 @@ def query_cimis(
 
     """
 
+    if isinstance(variables, pd.Series):
+        variables = variables.tolist()
+
     payload = {
         'appKey': appKey,
         'targets': station_id,
@@ -125,15 +136,15 @@ def query_cimis(
     # parse returned data
     df = pd.DataFrame(r.json()['Data']['Providers'][0]['Records'])
 
-    df[['Julian']] = df[['Julian']].astype(int)
-    df[['Hour']] = df[['Hour']].astype(float) / 100
-    df[['Station']] = df[['Station']].astype(int)
+    df['Julian'] = df['Julian'].astype(int)
+    df['Hour'] = df['Hour'].astype(float) / 100
+    df['Station'] = df['Station'].astype(int)
 
     # normalize variable data
     for var in variables:
         var_name = var_name_dict[var]
         var_df = pd.json_normalize(df[var_name]).add_prefix(f'{var_name}_')
-        var_df[[f'{var_name}_Value']] = var_df[[f'{var_name}_Value']].astype(float)
+        var_df[f'{var_name}_Value'] = var_df[f'{var_name}_Value'].astype(float)
         df = pd.concat([df.drop(columns=var_name), var_df], axis=1)
 
     return df
