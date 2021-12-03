@@ -31,6 +31,8 @@ def get_stations(all: bool = False) -> pd.DataFrame:
     stations = pd.DataFrame(r.json()['Stations'])
 
     stations['StationNbr'] = stations['StationNbr'].astype(int)
+    stations['ConnectDate'] = pd.to_datetime(stations['ConnectDate'], format="%m/%d/%Y")
+    stations['DisconnectDate'] = pd.to_datetime(stations['DisconnectDate'], format="%m/%d/%Y")
     stations['IsActive'] = stations['IsActive'] == 'True'
     stations['IsEtoStation'] = stations['IsEtoStation'] == 'True'
     stations['Elevation'] = stations['Elevation'].astype(float)
