@@ -81,7 +81,6 @@ def get_hourly_data(
     cimis_data = []
     for station_id in station_ids:
         df = query_cimis(station_id, variables, start, end, appKey)
-        df.insert(0, 'station_id', station_id)
         cimis_data.append(df)
     
     return pd.concat(cimis_data)
@@ -132,11 +131,16 @@ def query_cimis(
 
     try:
         r = requests.get('http://et.water.ca.gov/api/data', params=payload)
-    except requests.exceptions.RequestException as e:
-        raise SystemExit(e)
+        r.raise_for_status()
+    except requests.HTTPError as e:
+        if e.response.status_code == 403:
+            print(f'{station_id}_{start.year}_{start.month} | {e.response.text}')
+            return pd.DataFrame()       # return empty DF (i.e., skip)
     
     # parse returned data
     df = pd.DataFrame(r.json()['Data']['Providers'][0]['Records'])
+
+    df.insert(0, 'station_id', station_id)
 
     df['Julian'] = df['Julian'].astype(int)
     df['Hour'] = df['Hour'].astype(float) / 100
