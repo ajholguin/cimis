@@ -139,9 +139,6 @@ def query_cimis(
     
     # parse returned data
     df = pd.DataFrame(r.json()['Data']['Providers'][0]['Records'])
-
-    df.insert(0, 'station_id', station_id)
-
     df['Julian'] = df['Julian'].astype(int)
     df['Hour'] = df['Hour'].astype(float) / 100
     df['Station'] = df['Station'].astype(int)
