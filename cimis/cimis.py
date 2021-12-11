@@ -130,12 +130,23 @@ def query_cimis(
     }
 
     try:
-        r = requests.get('http://et.water.ca.gov/api/data', params=payload)
-        r.raise_for_status()
+        r = requests.get(
+            'http://et.water.ca.gov/api/data',
+            params=payload,
+            timeout=15      # seconds
+        )
+        r.raise_for_status()        
+    
+    # error -> return empty DF (i.e., skip)
     except requests.HTTPError as e:
-        if e.response.status_code == 403:
-            print(f'{station_id}_{start.year}_{start.month} | {e.response.text}')
-            return pd.DataFrame()       # return empty DF (i.e., skip)
+        print(f'{station_id}_{start.year}_{start.month} | {e.response.text}')
+        return pd.DataFrame()
+    except requests.exceptions.RequestException as e:
+        print(f'{station_id}_{start.year}_{start.month} | {e}')
+        return pd.DataFrame()
+    if r.content.startswith(b'<html><head><title>Request Rejected</title></head>'):
+        print(f'{station_id}_{start.year}_{start.month} | {r.content[:50]}')
+        return pd.DataFrame()
     
     # parse returned data
     df = pd.DataFrame(r.json()['Data']['Providers'][0]['Records'])
