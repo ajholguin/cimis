@@ -126,7 +126,7 @@ def query_cimis(
         'startDate': start.strftime('%m-%d-%Y'),
         'endDate': end.strftime('%m-%d-%Y'),
         'dataItems': ','.join(variables),
-        'unitOfMeasure': 'M'
+        'unitOfMeasure': 'E'
     }
 
     try:
