@@ -22,10 +22,11 @@ def get_stations(all: bool = False) -> pd.DataFrame:
     stations: pd.DataFrame
     
     """
-    try:
-        r = requests.get('http://et.water.ca.gov/api/station')
-    except requests.exceptions.RequestException as e:
-        raise SystemExit(e)
+
+    r = requests.get('http://et.water.ca.gov/api/station')
+    r.raise_for_status()
+    if r.content.startswith(b'<html><head><title>Request Rejected</title></head>'):
+        raise Exception('CIMIS Server Error')
     
     # parse returned data
     stations = pd.DataFrame(r.json()['Stations'])
@@ -44,7 +45,7 @@ def get_stations(all: bool = False) -> pd.DataFrame:
     return stations
 
 def get_hourly_data(
-        station_ids: Union[int, list[int]],
+        station_id: int,
         variables: list[str],
         start: date,
         end: date,
@@ -54,7 +55,7 @@ def get_hourly_data(
 
     Parameters
     ----------
-    station_ids: Union[int, list[int]] : Station IDs/numbers
+    station_id: int : Station ID/number
         
     variables: list[str] : Variables to return
         
@@ -73,17 +74,9 @@ def get_hourly_data(
 
     appKey = appKey if appKey else os.getenv('CIMIS_API_KEY')
 
-    if isinstance(station_ids, pd.Series):
-        station_ids = station_ids.tolist()      # Pandas Series
-    elif isinstance(station_ids, int):
-        station_ids = [station_ids]             # single value
+    cimis_data = query_cimis(station_id, variables, start, end, appKey)
 
-    cimis_data = []
-    for station_id in station_ids:
-        df = query_cimis(station_id, variables, start, end, appKey)
-        cimis_data.append(df)
-    
-    return pd.concat(cimis_data)
+    return cimis_data
 
 def get_daily_data():
     """Get daily weather station data"""
@@ -129,24 +122,14 @@ def query_cimis(
         'unitOfMeasure': 'E'
     }
 
-    try:
-        r = requests.get(
-            'http://et.water.ca.gov/api/data',
-            params=payload,
-            timeout=15      # seconds
-        )
-        r.raise_for_status()        
-    
-    # error -> return empty DF (i.e., skip)
-    except requests.HTTPError as e:
-        print(f'{station_id}_{start.year}_{start.month} | {e.response.text}')
-        return pd.DataFrame()
-    except requests.exceptions.RequestException as e:
-        print(f'{station_id}_{start.year}_{start.month} | {e}')
-        return pd.DataFrame()
+    r = requests.get(
+        'http://et.water.ca.gov/api/data',
+        params=payload,
+        timeout=15      # seconds
+    )
+    r.raise_for_status()
     if r.content.startswith(b'<html><head><title>Request Rejected</title></head>'):
-        print(f'{station_id}_{start.year}_{start.month} | {r.content[:50]}')
-        return pd.DataFrame()
+        raise Exception('CIMIS Server Error')
     
     # parse returned data
     df = pd.DataFrame(r.json()['Data']['Providers'][0]['Records'])
