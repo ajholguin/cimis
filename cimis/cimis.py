@@ -24,7 +24,7 @@ def get_stations(all: bool = False) -> pd.DataFrame:
 
     """
 
-    r = requests.get("http://et.water.ca.gov/api/station")
+    r = requests.get("http://et.water.ca.gov/api/station", timeout=10)
     r.raise_for_status()
     if r.content.startswith(b"<html><head><title>Request Rejected</title></head>"):
         raise Exception("CIMIS Server Error")
@@ -140,7 +140,8 @@ def query_cimis(
 
     df["Date"] = pd.to_datetime(df["Date"])
     df["Julian"] = df["Julian"].astype(int)
-    if "Hour" in df.columns: df["Hour"] = df["Hour"].astype(float) / 100
+    if "Hour" in df.columns:
+        df["Hour"] = df["Hour"].astype(float) / 100
     df["Station"] = df["Station"].astype(int)
 
     # normalize variable data
